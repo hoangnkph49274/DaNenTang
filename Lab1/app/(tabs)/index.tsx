@@ -6,6 +6,33 @@ import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 
 export default function HomeScreen() {
+  const players = [
+    { name: 'Messi', goals: 30 },
+    undefined,
+    { name: 'Ronaldo', goals: 28 },
+    { name: 'Neymar', goals: 22 },
+    { goals: 2 },
+    { name: 'Mbappé', goals: 25 },
+    { name: 'Pele', goals: null },
+    ];
+    type Player = {
+      name?: string;
+      goals?: number | null;
+    };
+    const valiRule = (player: Player | undefined) => {
+      return !!player?.name && typeof player.goals === 'number' && player.goals >= 0;
+    };
+    const list = players.filter(valiRule)
+    console.log("Danh sách cầu thủ hợp lệ: \n", list )
+    let top = list[0]
+    for(let i = 0;i<list.length;i++){
+      if(list[i] != null){
+        if(list[i]?.goals !> top?.goals!){
+          top=list[i]
+        }
+      }
+    }
+    console.log("Cầu thủ ghi bàn nhiều nhất:", top?.name, "-", top?.goals, "bàn thắng");
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
@@ -16,40 +43,8 @@ export default function HomeScreen() {
         />
       }>
       <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12'
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
+      <ThemedText type="title">Ngô Khánh Hoàng PH49274 </ThemedText>
+   </ThemedView>
     </ParallaxScrollView>
   );
 }
@@ -72,3 +67,4 @@ const styles = StyleSheet.create({
     position: 'absolute',
   },
 });
+
