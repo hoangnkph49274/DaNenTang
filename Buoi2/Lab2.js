@@ -100,15 +100,13 @@ const promise2 = () => new Promise((resolve, reject) =>
     setTimeout(() => 
         reject("Promise 2 thất bại"), 
 2000));
-const promise3 = () => new Promise((resolve) => 
-    setTimeout(() => 
-        resolve("Promise 3 hoàn thành"), 
-3000));
+const promise3 = async () => 
+    await fetch('https://64d8a86c5f9bf5b879ce6dd9.mockapi.io/api/v1/moviesNow');
 
 function handlePromiseAll() {
   Promise.all([promise1(), promise2(), promise3()])
     .then((results) => {
-      console.log("Yêu cầu 1: Tất cả promise hoàn thành", results);
+      console.log("Yêu cầu 1: Tất cả promise hoàn thành \n", results);
     })
     .catch((error) => {
       console.error("Yêu cầu 1: Một promise thất bại:", error);
