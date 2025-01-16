@@ -1,5 +1,5 @@
 import React from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { SafeAreaView, ScrollView, StyleSheet, Text, View, Image } from "react-native";
 
 const ViewComponent = () => {
   return (
@@ -19,6 +19,7 @@ const ViewComponent = () => {
 
 export const TextComponent = () => {
   return (
+    <SafeAreaView>
     <ScrollView>
       <View style={styles.container}>
         {/* Line 1 */}
@@ -72,9 +73,10 @@ export const TextComponent = () => {
             </Text> 
               {'\n'} {'\n'}
         </Text>
-
+        
       </View>
     </ScrollView>
+    </SafeAreaView>
   );
 };
 
@@ -95,6 +97,7 @@ const styles = StyleSheet.create({
   boldText: {
     fontWeight: 'bold',
   },
+  
 });
 
 export default ViewComponent;

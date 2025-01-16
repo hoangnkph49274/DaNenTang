@@ -42,6 +42,11 @@ export default function TabTwoScreen() {
             style={styles.tipStyle}
           />
           <Button title="Đăng ký"  onPress={handleClear}/>
+          <Image style={styles.containerImg}
+            source={{
+            uri: 'https://mediacms.thethaovanhoa.vn/Upload/qPf4BjfjvkrFearu8hrw/files/2020/12/NKK_1620.jpg',
+            }}
+          />
         </View>
       </ScrollView>
   );
@@ -61,7 +66,14 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginBottom: 10,
     paddingLeft: 10,
-  }
+  },
+  containerImg: {
+    width: '95%',
+    height: 200,
+    resizeMode: 'cover',
+    alignSelf: 'center',
+    marginTop: 20,
+  },
 });
 
 
