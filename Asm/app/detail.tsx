@@ -37,12 +37,12 @@ const ManCoffeeData: React.FC<Props> = ({ product, onGoBack }) => {
             <Ionicons name="chevron-back" size={24} color="#1e1e1e" />
           </TouchableOpacity>
           <TouchableOpacity style={styles.iconButton}
-            onPress={() => setIsFavorite(!isFavorite)} // Cập nhật trạng thái yêu thích
+            onPress={() => setIsFavorite(!isFavorite)} 
           >
             <Ionicons
-              name={isFavorite ? "heart" : "heart-outline"} // Đổi biểu tượng
+              name={isFavorite ? "heart" : "heart-outline"} 
               size={24}
-              color={isFavorite ? "red" : "#000"} // Đổi màu
+              color={isFavorite ? "red" : "#000"} 
             />
           </TouchableOpacity>
         </View>
