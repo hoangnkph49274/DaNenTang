@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "https://67b001a7dffcd88a67881973.mockapi.io"; // URL mẫu
+const API_URL = "https://67b001a7dffcd88a67881973.mockapi.io"; 
 
 const api = axios.create({
   baseURL: API_URL,
