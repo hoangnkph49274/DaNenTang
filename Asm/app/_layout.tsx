@@ -30,6 +30,8 @@ export default function RootLayout() {
         <Stack.Screen name="register" options={{ headerShown: false }} />
         <Stack.Screen name="main" options={{ headerShown: false }} />
         <Stack.Screen name="detail" options={{ headerShown: false }} />
+        <Stack.Screen name="admin" options={{ headerShown: false }} />
+        <Stack.Screen name="setting" options={{ headerShown: false }} />
         {/* Màn hình không tìm thấy */}
         <Stack.Screen name="+not-found" />
       </Stack>

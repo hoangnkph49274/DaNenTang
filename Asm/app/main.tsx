@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -7,184 +7,228 @@ import {
   Image,
   TouchableOpacity,
   StyleSheet,
-  Platform,
-  useColorScheme,
   SafeAreaView,
-  Button,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { Tabs } from "expo-router";
-import { HapticTab } from "@/components/HapticTab";
-import BlurTabBarBackground from "@/components/ui/TabBarBackground.ios";
-import { IconSymbol } from "@/components/ui/IconSymbol";
-import { Colors } from "react-native/Libraries/NewAppScreen";
 import Detail from "./detail";
+import DetailBeans from "./beans"
+import CartScreen from "./cart";
+import FavoritesScreen from "./favourite";
+import OrderHistoryScreen from "./order";
+import { router } from "expo-router";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 
-const type = [{name: 'All'},{name:'Cappuccino'},{name:'Espresso'},{name:'Americano'},{name:'Macchiato'}]
-const coffeeData = [
-  {
-    id: "1",
-    name: "Cappuccino",
-    description: "With Steamed Milk",
-    price: "$4.20",
-    rating: 4.5,
-    image: require('@/assets/images/capuchino1.jpg'),
-  },
-  {
-    id: "2",
-    name: "Cappuccino",
-    description: "With Foam",
-    price: "$4.20",
-    rating: 4.2,
-    image: require('@/assets/images/capuchino2.jpg'),
-  },
-  {
-    id: "3",
-    name: "Cappuccino",
-    description: "With Foam",
-    price: "$4.20",
-    rating: 4.2,
-    image: require('@/assets/images/capuchino2.jpg'),
-  },
-];
+const Tab = createBottomTabNavigator();
+const ICONS_MENU = {
+  Home: "https://cdn-icons-png.flaticon.com/512/1946/1946436.png", 
+  Cart: "https://cdn-icons-png.flaticon.com/512/1170/1170678.png", 
+  Favorites: "https://cdn-icons-png.flaticon.com/512/833/833472.png",
+  Order: "https://cdn-icons-png.flaticon.com/512/3081/3081559.png",
+};
 
-const beanData = [
-  {
-    id: "1",
-    name: "Robusta Beans",
-    description: "Medium Roasted",
-    price: "$4.20",
-    image: require('../assets/images/hat1.jpg'),
-  },
-  {
-    id: "2",
-    name: "Cappuccino",
-    description: "With Steamed Milk",
-    price: "$4.20",
-    image: require('@/assets/images/hat2.jpg'),
-  },
-  {
-    id: "3",
-    name: "Cappuccino",
-    description: "With Steamed Milk",
-    price: "$4.20",
-    image:require('@/assets/images/hat2.jpg'),
-  },
+const type = [
+  { name: "All" },
+  { name: "Cappuccino" },
+  { name: "Espresso" },
+  { name: "Americano" },
+  { name: "Macchiato" },
 ];
 
 const ManChinh = () => {
-  console.log('ManChinh component render'); // Log để kiểm tra số lần render
-  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [coffeeData, setCoffeeData] = useState([]);
+  const [beanData, setBeanData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [selectedBean, setSelectedBean] = useState<Product | null>(null);
+
+  interface Product {
+    id: string;
+    name: string;
+    description: string;
+    price: string;
+    image: string;
+  }
+  
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const resCoffee = await fetch("http://10.24.50.243:3000/product");
+        const resBeans = await fetch("http://10.24.50.243:3000/productBeans");
+        const coffeeJson = await resCoffee.json();
+        const beansJson = await resBeans.json();
+        setCoffeeData(coffeeJson);
+        setBeanData(beansJson);
+      } catch (error) {
+        console.error("Lỗi khi tải dữ liệu:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
 
   if (selectedProduct) {
-    console.log('Returning early with selectedProduct'); // Log để debug return sớm
-    return <Detail product={selectedProduct} onGoBack={() => setSelectedProduct(null)} />;
+    return <Detail productId={selectedProduct.id} onGoBack={() => setSelectedProduct(null)} />;
   }
-
-  console.log('Rendering main UI');
-  const renderItem = ({ item }: any) => (
-    <TouchableOpacity style={styles.card} onPress={()=> setSelectedProduct(item)}>
-      <Image source={ item.image } style={styles.image} />
+  if (selectedBean) {
+    return <DetailBeans productId={selectedBean.id} onGoBack={() => setSelectedBean(null)} />;
+  }
+  const handleAddToCart = async (item: Product) => {
+    if (!item) return;
+  
+    try {
+      const response = await fetch("http://10.24.50.243:3000/cart", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: item.id,  // Sửa lỗi 'id' chưa được khai báo
+          name: item.name,
+          image: item.image,
+          price: item.price,
+          size: "M",  // Mặc định size M nếu chưa chọn
+          quantity: 1,
+        }),
+      });
+  
+      const data = await response.json();
+      if (response.ok) {
+        alert("Thêm vào giỏ hàng thành công!");
+      } else {
+        alert(`Lỗi: ${data.message}`);
+      }
+    } catch (error) {
+      console.error("Lỗi khi thêm vào giỏ hàng:", error);
+      alert("Có lỗi xảy ra, vui lòng thử lại!");
+    }
+  };
+  
+  const renderItem1 = ({ item }: { item: Product }) => (
+    <TouchableOpacity style={styles.card} onPress={() => setSelectedProduct(item)}>
+      <Image source={{ uri: item.image }} style={styles.image} />
       <Text style={styles.title}>{item.name}</Text>
       <Text style={styles.description}>{item.description}</Text>
       <View style={styles.row}>
         <Text style={styles.price}>{item.price}</Text>
-        <TouchableOpacity style={styles.addButton}>
+        <TouchableOpacity style={styles.addButton} onPress={() => handleAddToCart(item)}>
           <Ionicons name="add" size={16} color="#fff" />
         </TouchableOpacity>
       </View>
     </TouchableOpacity>
   );
-  const typeItem = ({ item }: any) => {
-    return (
-      <TouchableOpacity>
-        <Text style={[styles.title , {paddingLeft: 20, fontSize: 18, }]}>{item.name}</Text>
-      </TouchableOpacity>
-    );
-  };
-  return (
-    <SafeAreaView style={styles.safeAreaView}>
-        <View style={styles.container}>
-      <View style={styles.header}>
-        <Image style={{width:40,height:40}}
-        source={require('@/assets/images/Menu.png')} />
-        <Ionicons name="person-circle-outline" size={35} color="#fff" />
-      </View><Text style={styles.headerText}>Find the best coffee for you</Text>
-      <View style={styles.searchContainer}>
-        <Image
-            style={styles.searchIcon}
-            source={require('@/assets/images/search-normal.png')}
-        />
-        <TextInput
-            style={styles.searchInput}
-            placeholder="Find Your Coffee..."
-            placeholderTextColor="#aaa"
-        />
-    </View>
-      <FlatList
-        data={type}
-        renderItem={typeItem}
-        horizontal
-        keyExtractor={(item) => item.name}
-        style={styles.horizontalList}
-      />
-      <FlatList
-        data={coffeeData}
-        renderItem={renderItem}
-        horizontal
-        keyExtractor={(item) => item.id}
-        style={styles.horizontalList}
-      />
-      <Text style={styles.sectionTitle}>Coffee beans</Text>
-      <FlatList
-        data={beanData}
-        renderItem={renderItem}
-        horizontal
-        keyExtractor={(item) => item.id}
-        style={styles.horizontalList}
-      />
-      <View style={{flexDirection: 'row',}}>
-        <TouchableOpacity>
-            <Image
-            source={require("../assets/images/home.png")} 
-            style={{width: 30, height: 30,marginLeft:20}}
-            />
-        </TouchableOpacity>
-        <TouchableOpacity>
-            <Image
-            source={require("../assets/images/bag-2.png")} 
-            style={{width: 30, height: 30,marginLeft:70}}
-            />
-        </TouchableOpacity>
-        <TouchableOpacity>
-            <Image
-            source={require("../assets/images/heart.png")} 
-            style={{width: 30, height: 30,marginLeft:70}}
-            />
-        </TouchableOpacity>
-        <TouchableOpacity>
-            <Image
-            source={require("../assets/images/notification.png")} 
-            style={{width: 30, height: 30,marginLeft:70, }}
-            />
+  
+  const renderItem2 = ({ item }: { item: Product }) => (
+    <TouchableOpacity style={styles.card} onPress={() => setSelectedBean(item)}>
+      <Image source={{ uri: item.image }} style={styles.image} />
+      <Text style={styles.title}>{item.name}</Text>
+      <Text style={styles.description}>{item.description}</Text>
+      <View style={styles.row}>
+        <Text style={styles.price}>{item.price}</Text>
+        <TouchableOpacity style={styles.addButton} onPress={() => handleAddToCart(item)}>
+          <Ionicons name="add" size={16} color="#fff" />
         </TouchableOpacity>
       </View>
-    </View>
+    </TouchableOpacity>
+  );
+  
+  
+
+  return (
+    <SafeAreaView style={styles.safeAreaView}>
+      <View style={styles.container}>
+        <TouchableOpacity style={styles.header} onPress={() => router.push('/setting')}>
+          <Image style={{ width: 40, height: 40 }} source={require('@/assets/images/Menu.png')} />
+          <Ionicons name="person-circle-outline" size={35} color="#fff" />
+        </TouchableOpacity>
+        <Text style={styles.headerText}>Find the best coffee for you</Text>
+        <View style={styles.searchContainer}>
+          <Image style={styles.searchIcon} source={require('@/assets/images/search-normal.png')} />
+          <TextInput style={styles.searchInput} placeholder="Find Your Coffee..." placeholderTextColor="#aaa" />
+        </View>
+        <FlatList data={type} renderItem={({ item }) => <Text style={styles.title}>{item.name}</Text>} horizontal keyExtractor={(item) => item.name} />
+        <FlatList data={coffeeData} renderItem={renderItem1} horizontal keyExtractor={(item) => item.id} />
+        <Text style={styles.sectionTitle}>Coffee beans</Text>
+        <FlatList data={beanData} renderItem={renderItem2} horizontal keyExtractor={(item) => item.id} />
+      </View>
     </SafeAreaView>
   );
 };
+const main = () => {
+  
+  return(
+    
+    <Tab.Navigator
+      screenOptions={{
+        headerShown: false,
+        tabBarActiveTintColor: '#FF6C22',
+        tabBarLabelStyle: {flexDirection: 'row'},
+        tabBarStyle: { backgroundColor: "#1E1E1E" },
+      }}
+      >
+      <Tab.Screen 
+        name = "Home"
+        component={ManChinh}
+        options={{
+          tabBarIcon: props => RenderIcon(ICONS_MENU.Home, props),
+          tabBarLabel: props => RenderLabal(props)
+        }}
+      />
+      <Tab.Screen 
+        name = "Cart"
+        component={CartScreen}
+        options={{
+          tabBarIcon: props => RenderIcon(ICONS_MENU.Cart, props),
+          tabBarLabel: props => RenderLabal(props)
+        }}
+      />
+      <Tab.Screen 
+        name = "Favorites"
+        component={FavoritesScreen}
+        options={{
+          tabBarIcon: props => RenderIcon(ICONS_MENU.Favorites, props),
+          tabBarLabel: props => RenderLabal(props)
+        }}
+      />
+      <Tab.Screen 
+        name = "History"
+        component={OrderHistoryScreen}
+        options={{
+          tabBarIcon: props => RenderIcon(ICONS_MENU.Order, props),
+          tabBarLabel: props => RenderLabal(props)
+        }}
+      />
+    </Tab.Navigator>
+  );
+}
+
+const RenderLabal = ( props: {
+  focused: boolean,
+  color: string,
+  children: string
+}) => 
+  props.focused ? (
+    <Text style={[styles.labal,{color: props.color}]}>{props.children}</Text>
+):null;
+
+const RenderIcon = ( 
+  icon: string,
+  props: {
+    focused: boolean,
+    color: string,
+    size: number
+}) => (
+    <Image source={{uri: icon}} tintColor={props.color} height={16} width={16}/>
+)
 
 const styles = StyleSheet.create({
-  safeAreaView:{
+  safeAreaView: {
     backgroundColor: "#1e1e1e",
-    flex: 1, 
-    justifyContent: 'flex-start', 
-    alignItems: "stretch", 
+    flex: 1,
   },
   container: {
     backgroundColor: "#1e1e1e",
-    paddingHorizontal: 16,
-    marginTop: 10,
+    padding: 15,
   },
   header: {
     flexDirection: "row",
@@ -199,23 +243,23 @@ const styles = StyleSheet.create({
     margin: 10,
   },
   searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#2a2a2a',
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#2a2a2a",
     borderRadius: 10,
     paddingHorizontal: 10,
-    width: '100%',
+    width: "100%",
     marginBottom: 20,
   },
   searchIcon: {
     width: 20,
     height: 20,
-    tintColor: '#aaa', // Đổi màu ảnh nếu cần
-    marginRight: 10,   // Khoảng cách giữa ảnh và TextInput
+    tintColor: "#aaa",
+    marginRight: 10,
   },
   searchInput: {
-    flex: 1, // Lấp đầy phần còn lại
-    color: '#fff',
+    flex: 1,
+    color: "#fff",
     fontSize: 16,
   },
   sectionTitle: {
@@ -224,15 +268,9 @@ const styles = StyleSheet.create({
     color: "#fff",
     marginVertical: 10,
   },
-  horizontalList: {
-    marginBottom: 10,
-  },
-  typeList: {
-    
-  },
   card: {
     backgroundColor: "#2a2a2a",
-borderRadius: 10,
+    borderRadius: 10,
     marginRight: 16,
     padding: 10,
     width: 150,
@@ -268,6 +306,11 @@ borderRadius: 10,
     borderRadius: 5,
     padding: 5,
   },
+  labal: { 
+    fontSize: 12,
+    fontWeight: "bold",
+    textAlign: "center",
+  },
 });
 
-export default ManChinh;
+export default main;

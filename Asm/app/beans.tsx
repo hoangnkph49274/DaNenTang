@@ -32,7 +32,7 @@ const ManCoffeeData: React.FC<Props> = ({ productId, onGoBack }) => {
   useEffect(() => {
     const fetchProductDetail = async () => {
       try {
-        const res = await fetch(`http://10.24.50.243:3000/product/${productId}`);
+        const res = await fetch(`http://10.24.50.243:3000/productBeans/${productId}`);
         const productDetail = await res.json();
         setProduct(productDetail);
       } catch (error) {
@@ -75,7 +75,7 @@ const ManCoffeeData: React.FC<Props> = ({ productId, onGoBack }) => {
           name: product.name,
           image: product.image,
           price: product.price,
-          size: selectedSize || "M",  // Mặc định size M nếu chưa chọn
+          size: selectedSize || "500gm", 
           quantity: 1,
         }),
       });
@@ -91,86 +91,6 @@ const ManCoffeeData: React.FC<Props> = ({ productId, onGoBack }) => {
       alert("Có lỗi xảy ra, vui lòng thử lại!");
     }
   };
-
-  const addFavorite = async () => {
-    if (!product) return;
-  
-    try {
-      const response = await fetch(`http://10.24.50.243:3000/favorite/${productId}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          productId,
-          name: product.name,
-          image: product.image,
-          price: product.price,
-          describe: product.description,
-        }),
-      });
-  
-      const text = await response.text();
-      console.log("📌 Raw response (add):", text);
-  
-      try {
-        const data = JSON.parse(text);
-        if (response.ok) {
-          setIsFavorite(true);
-          alert("Đã thêm vào yêu thích!");
-        } else {
-          alert(`Lỗi: ${data.message || "Lỗi không xác định"}`);
-        }
-      } catch (jsonError) {
-        console.error("❌ Lỗi khi parse JSON (add):", jsonError);
-        alert("Lỗi phản hồi không hợp lệ từ server!");
-      }
-    } catch (error) {
-      console.error("❌ Lỗi khi thêm vào yêu thích:", error);
-      alert("Có lỗi xảy ra, vui lòng thử lại!");
-    }
-  };
-  
-  const removeFavorite = async () => {
-    if (!product) return;
-  
-    try {
-      const response = await fetch(`http://10.24.50.243:3000/favorite/${productId}`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-  
-      const text = await response.text();
-      console.log("📌 Raw response (remove):", text);
-  
-      try {
-        const data = JSON.parse(text);
-        if (response.ok) {
-          setIsFavorite(false);
-          alert("Đã xóa khỏi yêu thích!");
-        } else {
-          alert(`Lỗi: ${data.message || "Lỗi không xác định"}`);
-        }
-      } catch (jsonError) {
-        console.error("❌ Lỗi khi parse JSON (remove):", jsonError);
-        alert("Lỗi phản hồi không hợp lệ từ server!");
-      }
-    } catch (error) {
-      console.error("❌ Lỗi khi xóa khỏi yêu thích:", error);
-      alert("Có lỗi xảy ra, vui lòng thử lại!");
-    }
-  };
-  
-  const toggleFavorite = () => {
-    if (isFavorite) {
-      removeFavorite();
-    } else {
-      addFavorite();
-    }
-  };
-  
   
   return (
     <SafeAreaView style={styles.SafeAreaView}>
@@ -182,7 +102,7 @@ const ManCoffeeData: React.FC<Props> = ({ productId, onGoBack }) => {
           <TouchableOpacity onPress={onGoBack} style={styles.iconButton}>
             <Ionicons name="chevron-back" size={24} color="#1e1e1e" />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.iconButton} onPress={toggleFavorite}>
+          <TouchableOpacity style={styles.iconButton} onPress={() => setIsFavorite(!isFavorite)}>
             <Ionicons
               name={isFavorite ? "heart" : "heart-outline"}
               size={24}
@@ -209,7 +129,7 @@ const ManCoffeeData: React.FC<Props> = ({ productId, onGoBack }) => {
         </Text>
         <Text style={styles.sectionTitle}>Size</Text>
         <View style={styles.sizeContainer}>
-          {["S", "M", "L"].map((size) => (
+          {["250gm", "500gm", "750gm"].map((size) => (
             <TouchableOpacity
               key={size}
               style={[
@@ -305,8 +225,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#444",
     borderRadius: 20,
     paddingVertical: 10,
-    paddingHorizontal: 45,
-    marginRight: 35,
+    paddingHorizontal: 25,
+    marginRight: 45,
   },
   activeSize: {
     backgroundColor: "#ff7f50",

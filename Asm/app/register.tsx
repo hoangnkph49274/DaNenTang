@@ -63,25 +63,21 @@ export default function ManDN() {
         }
     };
 
-    const handleSubmit = () => {
-        // Đánh dấu đã nhấn submit
+    const handleSubmit = async () => {
         setIsSubmitted(true);
-
+    
         // Xóa lỗi cũ
         setEmailError('');
         setPasswordError('');
         setNameError('');
         setRePasswordError('');
-
+    
         if (!name) {
             setNameError('Nhập Tên');
         }
-        // Kiểm tra nếu email trống
         if (!email) {
             setEmailError('Nhập Tài Khoản');
         }
-
-        // Kiểm tra nếu password trống
         if (!password) {
             setPasswordError('Nhập Mật Khẩu');
         }
@@ -90,31 +86,51 @@ export default function ManDN() {
         } else if (rePassword !== password) {
             setRePasswordError('Mật khẩu nhập lại không khớp');
         }
-
-        // Nếu tất cả trường hợp hợp lệ
+    
+        // Kiểm tra nếu tất cả trường đều hợp lệ
         if (email && password && name && rePassword && rePassword === password) {
-            // Kiểm tra điều kiện đăng nhập
             if (!isEmailValid) {
                 setEmailError('Email không hợp lệ');
-                return
-            } else if (password.length <6) {
-                setPasswordError('Mật khẩu không hợp lệ');
-                return
+                return;
+            } else if (password.length < 6) {
+                setPasswordError('Mật khẩu phải có ít nhất 6 ký tự');
+                return;
             } else {
-                
-                Alert.alert('Thành công', 'Bạn đã đăng ký thành công!',[
-                    {
-                        text: 'OK',
-                        onPress: () => {
-                            router.push('/login');
-                            
+                try {
+                    const response = await fetch('http://10.24.50.243:3000/users', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
                         },
-                    },
-                ])
-                
+                        body: JSON.stringify({
+                            name: name,
+                            email: email,
+                            password: password,
+                        }),
+                    });
+    
+                    const data = await response.json();
+    
+                    if (response.ok) {
+                        Alert.alert('Thành công', 'Bạn đã đăng ký thành công!', [
+                            {
+                                text: 'OK',
+                                onPress: () => {
+                                    router.push('/login');
+                                },
+                            },
+                        ]);
+                    } else {
+                        Alert.alert('Lỗi', data.message || 'Đăng ký không thành công!');
+                    }
+                } catch (error) {
+                    Alert.alert('Lỗi', 'Không thể kết nối đến server. Vui lòng thử lại sau.');
+                    console.error('Lỗi kết nối:', error);
+                }
             }
         }
     };
+    
 
     return (
         <View style={styles.container}>
